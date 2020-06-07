@@ -1,0 +1,16 @@
+{
+  "name": "Auto Speech",
+  "description": "Automatically read out comments on MixChannel.",
+  "version": "1.0",
+  "manifest_version": 2,
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mixch.tv/u/*/live"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
