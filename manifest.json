@@ -3,6 +3,10 @@
   "description": "Automatically read out comments on MixChannel.",
   "version": "1.0",
   "manifest_version": 2,
+  "permissions": [
+    "declarativeContent",
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -12,5 +16,14 @@
         "content.js"
       ]
     }
-  ]
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "page_action": {
+    "default_popup": "popup.html"
+  }
 }
