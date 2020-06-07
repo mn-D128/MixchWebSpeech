@@ -1,0 +1,2 @@
+# MixchWebSpeech
+MixChannel Web版のコメント自動読み上げをするChrome拡張機能
