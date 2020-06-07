@@ -38,7 +38,7 @@ window.onload = (event) => {
     speechUtter.rate = 1.0;
     speechUtter.voice = gBetterVoice;
 
-    // TODO: firstではだめかも
+    // TODO: firstではだめかも 差し込まれる場合もあり
     const element = chatContent.firstElementChild;
     // 通常コメント
     if (element.classList.contains("chat-normal")) {
@@ -67,6 +67,7 @@ window.onload = (event) => {
     speechSynthesis.speak(speechUtter);
   }, false);
 
+  // TODO: なんとかする
   const elements = document.getElementsByClassName('fan-btn');
   for (var i = 0; i < elements.length; i++) {
     elements[i].onclick = function () {
