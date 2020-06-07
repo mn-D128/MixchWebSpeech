@@ -7,12 +7,10 @@ function updateBetterVoice() {
     }
 
     if (voice.name.startsWith('Google')) {
-      console.log('updateBetterVoice ' + voice.name);
       gBetterVoice = voice;
       return;
     }
 
-    console.log('updateBetterVoice ' + voice.name);
     gBetterVoice = voice;
   }
 
