@@ -1,4 +1,6 @@
 var gBetterVoice = null;
+var gStart = false;
+var gRate = 1.0;
 
 function updateBetterVoice() {
   function subUpdateBetterVoice(voice) {
@@ -20,13 +22,24 @@ function updateBetterVoice() {
   });
 }
 
-function createSpeechSynthesisUtterance() {
+function createSpeechSynthesisUtterance(rate) {
   const speechUtter = new SpeechSynthesisUtterance();
-  speechUtter.rate = 1.0;
+  speechUtter.rate = rate;
   speechUtter.volume = 1.0;
   speechUtter.voice = gBetterVoice;
   return speechUtter;
 }
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (var key in changes) {
+    const storageChange = changes[key];
+    if (key === "start") {
+      gStart = storageChange.newValue;
+    } else if (key === "rate") {
+      gRate = storageChange.newValue;
+    }
+  }
+});
 
 chrome.storage.sync.set({ start: false }, function () {
   console.log('saved storage start false');
@@ -44,45 +57,47 @@ if (!"speechSynthesis" in window) {
 }
 
 window.onload = (event) => {
-  const chatContent = document.getElementById("chat-content");
-  chatContent.addEventListener("DOMNodeInserted", function (ev) {
-    chrome.storage.sync.get('start', function (data) {
-      if (data.start == false) {
-        return;
-      }
+  const observer = new MutationObserver(function (mutations, observer) {
+    if (!gStart) {
+      return;
+    }
 
-      const speechUtter = createSpeechSynthesisUtterance();
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        const speechUtter = createSpeechSynthesisUtterance(gRate);
+        const element = node;
 
-      const element = ev.srcElement;
+        // 通常コメント
+        if (element.classList.contains("chat-normal")) {
+          speechUtter.text = element.children[2].innerHTML;
+        }
+        // スーパーコメント
+        else if (element.classList.contains("chat-supercomment")) {
+          speechUtter.text = element.firstChild.firstChild.firstChild.lastChild.innerHTML;
+        }
+        // スタンプ
+        else if (element.classList.contains("chat-stamp")) {
+          speechUtter.text = element.firstChild.lastChild.innerHTML + "さんがスタンプを投げました";
+        }
+        // 動画ギフト
+        else if (element.classList.contains("chat-videolog")) {
+          speechUtter.text = element.children[1].innerHTML;
+        }
+        // TODO: キャスト
+        else if (element.style.cssText === "animation-name: chat-popup; animation-duration: 2s;") {
+          speechUtter.text = element.firstChild.innerHTML;
+        }
 
-      //console.log("css " + element.style.cssText);
+        // アドボーナス
+        // ファンになった
+        // ファンクラブ加入
 
-      // 通常コメント
-      if (element.classList.contains("chat-normal")) {
-        speechUtter.text = element.children[2].innerHTML;
-      }
-      // スーパーコメント
-      else if (element.classList.contains("chat-supercomment")) {
-        speechUtter.text = element.firstChild.firstChild.firstChild.lastChild.innerHTML;
-      }
-      // スタンプ
-      else if (element.classList.contains("chat-stamp")) {
-        speechUtter.text = element.firstChild.lastChild.innerHTML + "さんがスタンプを投げました";
-      }
-      // 動画ギフト
-      else if (element.classList.contains("chat-videolog")) {
-        speechUtter.text = element.children[1].innerHTML;
-      }
-      // TODO: キャスト
-      else if (element.style.cssText === "animation-name: chat-popup; animation-duration: 2s;") {
-        speechUtter.text = element.firstChild.innerHTML;
-      }
-
-      // アドボーナス
-      // ファンになった
-      // ファンクラブ加入
-
-      window.speechSynthesis.speak(speechUtter);
+        window.speechSynthesis.speak(speechUtter);
+      });
     });
-  }, false);
+  });
+
+  const chatContent = document.getElementById("chat-content");
+  const config = { childList: true };
+  observer.observe(chatContent, config);
 };
