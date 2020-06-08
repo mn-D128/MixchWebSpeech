@@ -7,6 +7,13 @@ chrome.storage.sync.get('rate', function (data) {
 
 window.onload = (event) => {
   const startButton = document.getElementById("startButton");
+  const stopButton = document.getElementById("stopButton");
+
+  chrome.storage.sync.get('start', function (data) {
+    startButton.disabled = data.start;
+    stopButton.disabled = !data.start;
+  });
+
   startButton.onclick = function () {
     if (!"speechSynthesis" in window) {
       console.log('not support SpeechSynthesisUtterance');
@@ -21,8 +28,17 @@ window.onload = (event) => {
     speechUtter.text = "よみあげすたーと";
     window.speechSynthesis.speak(speechUtter);
 
-    chrome.storage.sync.set({ start: true }, function () {
-    });
+    chrome.storage.sync.set({ start: true }, function () { });
+
+    startButton.disabled = true;
+    stopButton.disabled = false;
+  };
+
+  stopButton.onclick = function () {
+    chrome.storage.sync.set({ start: false }, function () { });
+
+    startButton.disabled = false;
+    stopButton.disabled = true;
   };
 
   const rate = document.getElementById('rate');
